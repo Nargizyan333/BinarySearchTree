@@ -23,8 +23,10 @@ protected:
     void preorder(BinaryNode<T>* subTreePtr, void visit(T&&));
     void inorder(BinaryNode<T>* subTreePtr, void visit(T&&));
     void postorder(BinaryNode<T>* subTreePtr, void visit(T&&));
+    void toFileHelper(BinaryNode<T>* subTreePtr) const;
+    void toString(BinaryNode<T>* subTreePtr, std::string& str) const;
+    BinaryNode<T>* toBSTHelper(const std::string& buffer, int& pos, int minValue, int maxValue);
 public:
-    BinarySearchTree();
     BinarySearchTree(const T& rootItem);
     BinarySearchTree(const BinarySearchTree<T>& tree);
     ~BinarySearchTree();
@@ -39,6 +41,8 @@ public:
     void preorderTraversal(void visit(T&&));
     void inorderTraversal(void visit(T&&));
     void postorderTraversal(void visit(T&&));
+    void toFile() const;
+    void toBST(std::ifstream& fin);
 };
 
 #endif

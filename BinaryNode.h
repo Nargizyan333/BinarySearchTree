@@ -4,10 +4,10 @@
 template <class T>
 class BinaryNode {
 private:
-    T mValue;
     BinaryNode<T>* mLeftNodePtr;
     BinaryNode<T>* mRightNodePtr;
 public:
+    T mValue;
     BinaryNode();
     BinaryNode(const T& value);
     BinaryNode(const T& value, BinaryNode<T>* lPtr, BinaryNode<T>* rPtr);

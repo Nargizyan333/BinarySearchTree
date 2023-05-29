@@ -2,6 +2,8 @@
 #include "BinaryNode.h"
 
 #include <iostream>
+#include <string>
+#include <fstream>
 
 template <class T>
 BinaryNode<T> *BinarySearchTree<T>::copyTree(const BinaryNode<T> *treePtr) const {
@@ -20,15 +22,16 @@ BinaryNode<T> *BinarySearchTree<T>::insertInorder(BinaryNode<T> *subTreePtr, Bin
     if (subTreePtr == nullptr) {
         subTreePtr = newNode;
         success = true;
-    }
-    if (newNode -> getValue() > subTreePtr -> getValue()) {
-        BinaryNode<T> *rightPtr = insertInorder(subTreePtr -> getRightChildPtr(), newNode, success);
-        subTreePtr->setRightChildPtr(rightPtr);
-    } else if (newNode -> getValue() < subTreePtr -> getValue()) {
-        BinaryNode<T> *leftPtr = insertInorder(subTreePtr -> getLeftChildPtr(), newNode, success);
-        subTreePtr->setLeftChildPtr(leftPtr);
     } else {
-        success = false;
+        if (newNode -> getValue() > subTreePtr -> getValue()) {
+            BinaryNode<T> *rightPtr = insertInorder(subTreePtr -> getRightChildPtr(), newNode, success);
+            subTreePtr->setRightChildPtr(rightPtr);
+        } else if (newNode -> getValue() < subTreePtr -> getValue()) {
+            BinaryNode<T> *leftPtr = insertInorder(subTreePtr -> getLeftChildPtr(), newNode, success);
+            subTreePtr->setLeftChildPtr(leftPtr);
+        } else {
+            success = false;
+        }
     }
     return subTreePtr;
 }
@@ -189,7 +192,40 @@ void BinarySearchTree<T>::postorder(BinaryNode<T> *subTreePtr, void visit(T&&)) 
 }
 
 template <class T>
-BinarySearchTree<T>::BinarySearchTree() : mRoot(nullptr) {}
+void BinarySearchTree<T>::toFileHelper(BinaryNode<T> *subTreePtr) const {
+    std::string treeInStr;
+    toString(subTreePtr, treeInStr);
+    std::ofstream fout;
+    fout.open("./BST.txt");
+    fout << treeInStr << std::endl;
+    fout.close();
+}
+
+template <class T>
+void BinarySearchTree<T>::toString(BinaryNode<T> *subTreePtr, std::string& str) const {
+    if (!subTreePtr) return;
+    char num[sizeof(T)];
+    memcpy(num, &(subTreePtr -> mValue), sizeof(T));
+    for (int i = 0; i < sizeof(T); ++i) {
+        str.push_back(num[i]);
+    }
+    toString(subTreePtr -> getLeftChildPtr(), str);
+    toString(subTreePtr -> getRightChildPtr(), str);
+}
+
+template <class T>
+BinaryNode<T>* BinarySearchTree<T>::toBSTHelper(const std::string& buffer, int& pos, int minValue, int maxValue) {
+    if (pos >= buffer.size()) return NULL;
+    int value;
+    memcpy(&value, &buffer[pos], sizeof(T));
+    if (value < minValue || value > maxValue) return NULL;
+
+    BinaryNode<T>* node = new BinaryNode<T>(value);
+    pos += sizeof(T);
+    node -> setLeftChildPtr(toBSTHelper(buffer, pos, minValue, value));
+    node ->setRightChildPtr(toBSTHelper(buffer, pos, value, maxValue));
+    return node;
+}
 
 template <class T>
 BinarySearchTree<T>::BinarySearchTree(const T& rootItem) : mRoot(new BinaryNode<T>(rootItem)) {}
@@ -261,4 +297,17 @@ void BinarySearchTree<T>::inorderTraversal(void visit(T&&)) {
 template <class T>
 void BinarySearchTree<T>::postorderTraversal(void visit(T&&)) {
     postorder(mRoot, visit);
+}
+
+template <class T>
+void BinarySearchTree<T>::toFile() const {
+    toFileHelper(mRoot);
+}
+
+template <class T>
+void BinarySearchTree<T>::toBST(std::ifstream &fin) {
+    std::string data;
+    fin >> data;
+    int pos = 0;
+    mRoot = toBSTHelper(data, pos, INT_MIN, INT_MAX);
 }
